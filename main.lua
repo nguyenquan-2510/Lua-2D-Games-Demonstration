@@ -1,6 +1,9 @@
 local love = require("love")
 
 function love.load()
+    wf = require("libs/windfield")
+    world = wf.newWorld(0, 0)
+
     camera = require("libs/camera")
     cam = camera()
 
@@ -11,9 +14,11 @@ function love.load()
     gamemap = sti("maps/testmap.lua")
 
     player = {}
+    player.collider = world:newBSGRectangleCollider(400, 250, 50, 100, 10)
+    player.collider:setFixedRotation(true)
     player.x = 400
     player.y = 200
-    player.speed = 5
+    player.speed = 300
     player.spritesheet = love.graphics.newImage("assets/player-sheet.png")
     player.grid = anim8.newGrid(12, 18, player.spritesheet:getWidth(), player.spritesheet:getHeight())
 
@@ -26,34 +31,53 @@ function love.load()
     player.anim = player.animations.left
 
     background = love.graphics.newImage("assets/background.png")
+
+    walls = {}
+    if gamemap.layers["walls"] then
+        for i, obj in pairs(gamemap.layers["walls"].objects) do
+            local wall = world:newRectangleCollider(obj.x, obj.y, obj.width, obj.height)
+            wall:setType("static")
+            table.insert(walls, wall)
+        end
+    end
 end
 
 function love.update(dt)
     local isMoving = false
+
+    local vx = 0
+    local vy = 0
+
     if love.keyboard.isDown("right") then
-        player.x = player.x + player.speed
+        vx = player.speed
         player.anim = player.animations.right
         isMoving = true
     end
     if love.keyboard.isDown("left") then
-        player.x = player.x - player.speed
+        vx = -1 * player.speed
         player.anim = player.animations.left
         isMoving = true
     end
     if love.keyboard.isDown("down") then
-        player.y = player.y + player.speed
+        vy = player.speed
         player.anim = player.animations.down
         isMoving = true
     end
     if love.keyboard.isDown("up") then
-        player.y = player.y - player.speed
+        vy = -1 * player.speed
         player.anim = player.animations.up
         isMoving = true
     end
 
+    player.collider:setLinearVelocity(vx, vy)
+
     if not isMoving then
         player.anim:gotoFrame(2)
     end
+
+    world:update(dt)
+    player.x = player.collider:getX()
+    player.y = player.collider:getY()
 
     player.anim:update(dt)
 
@@ -91,7 +115,6 @@ function love.draw()
         gamemap:drawLayer(gamemap.layers["ground"])
         gamemap:drawLayer(gamemap.layers["trees"])
         player.anim:draw(player.spritesheet, player.x, player.y, nil, 6, nil, 6, 9)
+        -- world:draw()
     cam:detach()
-
-    love.graphics.print("Use arrow keys to move the player", 10, 10)
 end
