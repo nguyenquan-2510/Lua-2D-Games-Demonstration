@@ -34,8 +34,17 @@ function love.load()
 
     walls = {}
     if gamemap.layers["walls"] then
-        for i, obj in pairs(gamemap.layers["walls"].objects) do
-            local wall = world:newRectangleCollider(obj.x, obj.y, obj.width, obj.height)
+        for _, obj in pairs(gamemap.layers["walls"].objects) do
+            local x = obj.x
+            local y = obj.y
+            local width = obj.width
+            local height = obj.height
+
+            -- Optimization for zero width/height walls
+            if width == 0 then width = 1 end
+            if height == 0 then height = 1 end
+
+            local wall = world:newRectangleCollider(x, y, width, height)
             wall:setType("static")
             table.insert(walls, wall)
         end
