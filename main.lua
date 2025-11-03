@@ -1,4 +1,3 @@
-local love = require("love")
 
 function love.load()
     wf = require("libs/windfield")
@@ -37,12 +36,8 @@ function love.load()
         for _, obj in pairs(gamemap.layers["walls"].objects) do
             local x = obj.x
             local y = obj.y
-            local width = obj.width
-            local height = obj.height
-
-            -- Optimization for zero width/height walls
-            if width == 0 then width = 1 end
-            if height == 0 then height = 1 end
+            local width = (obj.width == 0) and 1 or obj.width
+            local height = (obj.height == 0) and 1 or obj.height
 
             local wall = world:newRectangleCollider(x, y, width, height)
             wall:setType("static")
