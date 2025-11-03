@@ -7,3 +7,4 @@ Yes i know how to fix the epsilon error :>
 This is the basics of making rpg game :<
 
 Btw why there are so many warnings ? 306 in particular
+yo 210 xDDDD
